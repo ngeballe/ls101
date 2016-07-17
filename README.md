@@ -36,5 +36,20 @@ Tasks
 - [x] item 2
 - [ ] item 3
 
+# Emoji
+
+Let's :+1: try this
+How about this? :+3:
+Or this :smile:
+:blush:
+:grin:
+:pensive:
+
+New paragraph
+
+Another new paragraph
+
+
+
 
 
