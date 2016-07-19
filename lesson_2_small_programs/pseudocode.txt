@@ -1,0 +1,59 @@
+pseudocode.txt
+
+Remember, pseudo-code is a guess at the solution and there's no verification that the logic is correct. Only when you translate it to actual programming code is the logic being verified.
+
+1. a method that returns the sum of two integers
+
+START
+
+Given integer1 and integer2
+SET sum = integer1 + integer 2
+PRINT sum
+
+END
+
+2. a method that takes an array of strings, and returns a string that is all those strings concatenated together
+
+START
+
+# Given string_array (an array of strings)
+
+SET iterator = 1
+SET strings_concatenated = ""
+
+WHILE iterator < size of string_array
+  SET current_string = value within string_array at space "iterator"
+  strings_concatenated = strings_concatenated + current_string
+  iterator = iterator + 1
+
+PRINT strings_concatenated
+
+END
+
+3. a method that takes an array of integers, and returns a new array with every other element
+
+START
+
+# Given an array of integers integer_array
+
+SET iterator = 1
+SET new_array = []
+
+WHILE iterator < size of integer_array
+  IF iterator is even number
+    current_integer = value within integer_array at position "iterator"
+    add current_integer to the end of new_array
+  ELSE
+    go to the next iteration
+  iterator = iterator + 1
+
+PRINT new_array
+
+END
+
+
+Notice that we have a SUBPROCESS keyword to show that there's some other thing that will take care of extracting the largest number out of a collection. Just like before, we could have included the entire formal pseudo-code from the previous assignment, but that would have made it very long, and our confidence in such long pseudo-code cannot be very good. Extracting to sub-processes helps us focus on a well defined narrowly scoped set of pseudo-code.
+
+
+
+As you use pseudo-code and flowcharts to help you dissect the logic of a problem, you'll be constantly trying to figure out how detailed the chart and words should be, and what can be extracted to sub-processes. This is exactly what a programmer should be thinking about when designing the solution to a problem. You won't get it right the first time.
