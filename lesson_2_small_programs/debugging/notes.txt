@@ -1,0 +1,6 @@
+notes.txt
+
+One very important note is to fix one problem at a time. It's common to notice additional edge cases or problems as you're implementing a fix. Resist the urge to fix multiple problems at once.
+
+
+Finally, after implementing a fix, make sure to verify that the code fixed the problem by using a similar set of tests from step #2. After you learn about automated testing, you'll want to add an additional automated test to prevent regression. For now, you can test manually.
