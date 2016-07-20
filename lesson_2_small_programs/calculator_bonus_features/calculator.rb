@@ -1,33 +1,44 @@
-def prompt(message)
+#require_relative "config.rb"
+require 'yaml'
+MESSAGES = YAML.load_file('calculator_messages.yml')
+LANGUAGE = 'en'
+
+def messages(message, lang='en')
+  MESSAGES[lang][message]
+end
+
+def prompt(key)
+  message = messages(key, LANGUAGE)
   Kernel.puts("=> #{message}")
 end
 
 def valid_number?(num)
-  # /\d+/ =~ num
-  # num.to_i() != 0
-  /\A[\d\.]+\z/ =~ num
+  # /\A[\d\.]+\z/ =~ num
+  /\A\d*\.?\d*\z/ =~ num && num =~ /\d/
+  # or /\d/.match(input) && /^\d*\.?\d*$/.match(input)
 end
 
 def operator_to_message(op)
-  case op
-  when "1"
-    "Adding"
-  when "2"
-    "Subtracting"
-  when "3"
-    "Multiplying"
-  when "4"
-    "Dividing"
-  end
+  word = case op
+         when "1"
+           "Adding"
+         when "2"
+           "Subtracting"
+         when "3"
+           "Multiplying"
+         when "4"
+           "Dividing"
+         end
+  word
 end
 
-prompt("Welcome to Calculator! Enter your name:")
+prompt(messages('welcome'))
 
 name = ''
 loop do
   name = Kernel.gets().chomp()
   if name.empty?
-    prompt("Make sure to use a valid name.")
+    prompt(messages('valid_name'))
   else
     break
   end
@@ -38,25 +49,25 @@ prompt("Hi, #{name}!")
 loop do # main loop
   number1 = ''
   loop do
-    prompt("What's the first number?")
+    prompt(messages('first_number'))
     number1 = Kernel.gets().chomp()
 
     if valid_number?(number1)
       break
     else
-      prompt("Hmmmmm... that doesn't look like a valid number")
+      prompt(messages('valid_number'))
     end
   end
 
   number2 = ''
   loop do
-    prompt("What's the second number?")
+    prompt(messages('second_number'))
     number2 = Kernel.gets().chomp()
 
     if valid_number?(number2)
       break
     else
-      prompt("Hmmmmm... that doesn't look like a valid number")
+      prompt(messages('valid_number'))
     end
   end
 
@@ -76,7 +87,7 @@ loop do # main loop
     if %w(1 2 3 4).include?(operator)
       break
     else
-      prompt("Must choose 1, 2, 3, or 4")
+      prompt(messages('valid_operator'))
     end
   end
 
@@ -95,9 +106,9 @@ loop do # main loop
 
   prompt("The result is #{result}")
 
-  prompt("Do you want to perform another calculation? (Y to calculate again)")
+  prompt(messages('another_calculation'))
   answer = Kernel.gets().chomp()
   break unless answer.downcase().start_with?('y')
 end
 
-prompt("Thank you for using the calculator. Good-bye!")
+prompt(messages('goodbye'))
