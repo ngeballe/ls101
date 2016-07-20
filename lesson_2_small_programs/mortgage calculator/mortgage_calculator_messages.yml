@@ -1,0 +1,6 @@
+welcome: "Welcome!"
+loan_amount: "What's the amount of the loan? (Omit the dollar sign)"
+apr: "Enter the Annual Percentage Rate (APR). Enter it as a decimal, so for 6%, put \"0.06\""
+loan_duration: "Enter the loan duration in years"
+valid_integer: "Please enter a valid integer"
+valid_decimal: "Please enter a valid decimal between 0.0 and 1.0"

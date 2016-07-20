@@ -9,6 +9,7 @@ end
 
 def prompt(key)
   message = messages(key, LANGUAGE)
+  message ||= key # if no message found in the MESSAGES hash, just display the original key
   Kernel.puts("=> #{message}")
 end
 
@@ -32,7 +33,7 @@ def operator_to_message(op)
   word
 end
 
-prompt(messages('welcome'))
+prompt('welcome')
 
 name = ''
 loop do
@@ -95,11 +96,11 @@ loop do # main loop
 
   result = case operator
            when "1"
-             number1.to_i() + number2.to_i()
+             number1.to_f() + number2.to_f()
            when "2"
-             number1.to_i() - number2.to_i()
+             number1.to_f() - number2.to_f()
            when "3"
-             number1.to_i() * number2.to_i()
+             number1.to_f() * number2.to_f()
            when "4"
              number1.to_f() / number2.to_f()
            end
