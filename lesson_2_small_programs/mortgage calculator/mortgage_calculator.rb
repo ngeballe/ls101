@@ -17,8 +17,8 @@ def valid_number?(s)
 end
 
 def monthly_payment(loan_amount, monthly_interest_rate, loan_duration_months)
-  payment = loan_amount * monthly_interest_rate /
-            (1 - (1 + monthly_interest_rate)**-loan_duration_months)
+  loan_amount * monthly_interest_rate /
+    (1 - (1 + monthly_interest_rate)**-loan_duration_months)
 end
 
 # tests
@@ -70,7 +70,8 @@ loop do
   loan_duration_months = loan_duration_years.to_i * 12
 
   # use formula
-  payment = monthly_payment(loan_amount, monthly_interest_rate, loan_duration_months)
+  payment = monthly_payment(loan_amount, monthly_interest_rate,
+                            loan_duration_months)
   puts "The monthly payment is $#{format('%02.2f', payment)}."
 
   prompt(MESSAGES['another_calculation'])
