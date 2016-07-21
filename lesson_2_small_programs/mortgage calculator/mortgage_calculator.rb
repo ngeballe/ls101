@@ -1,5 +1,6 @@
 # mortgage_calculator.rb
 
+require 'pry'
 require 'yaml'
 MESSAGES = YAML.load_file('mortgage_calculator_messages.yml')
 
@@ -11,60 +12,70 @@ def valid_integer?(s)
   /^\d+$/.match(s)
 end
 
-def valid_decimal?(s)
-  /^0?\.\d+$/.match(s)
+def valid_number?(s)
+  /\d/.match(s) && /^\d*\.?\d*$/.match(s)
 end
 
-def monthly_payment(loan_amount, monthly_interest, loan_duration_months)
-  numerator = loan_amount * monthly_interest
-  numerator *= (1 + monthly_interest)**loan_duration_months
-  denominator = (1 + monthly_interest)**loan_duration_months - 1
-  numerator / denominator
+def monthly_payment(loan_amount, monthly_interest_rate, loan_duration_months)
+  payment = loan_amount * monthly_interest_rate /
+            (1 - (1 + monthly_interest_rate)**-loan_duration_months)
 end
+
+# tests
+# puts monthly_payment(100000, 0.0041666667, 360)
+# puts monthly_payment(30000, 0.06/12, 10*12)
+# puts monthly_payment(93246, 0.042/12, 13*12)
+# /tests
 
 prompt(MESSAGES['welcome'])
 
-# get loan amount
-prompt(MESSAGES['loan_amount'])
-
-loan_amount = ''
-
 loop do
-  loan_amount = gets.chomp
-  break if valid_integer?(loan_amount)
-  prompt(MESSAGES['valid_integer'])
+  # get loan amount
+  prompt(MESSAGES['loan_amount'])
+
+  loan_amount = ''
+  loop do
+    loan_amount = gets.chomp
+    break if valid_number?(loan_amount)
+    prompt(MESSAGES['valid_number'])
+  end
+
+  loan_amount = loan_amount.to_f
+
+  # get APR
+  prompt(MESSAGES['apr'])
+
+  apr = ''
+  loop do
+    apr = gets.chomp
+    break if valid_number?(apr)
+    prompt(MESSAGES['valid_number'])
+  end
+
+  # get loan duration
+  prompt(MESSAGES['loan_duration'])
+
+  loan_duration_years = ''
+  loop do
+    loan_duration_years = gets.chomp
+    break if valid_integer?(loan_duration_years)
+    prompt(MESSAGES['valid_integer'])
+  end
+
+  # calculate monthly interest rate
+  annual_interest = apr.to_f / 100
+  monthly_interest_rate = annual_interest / 12
+
+  # calculate loan duration in months
+  loan_duration_months = loan_duration_years.to_i * 12
+
+  # use formula
+  payment = monthly_payment(loan_amount, monthly_interest_rate, loan_duration_months)
+  puts "The monthly payment is $#{format('%02.2f', payment)}."
+
+  prompt(MESSAGES['another_calculation'])
+  reply = gets.chomp
+  break unless reply.downcase.start_with?('y')
 end
 
-loan_amount = loan_amount.to_i
-
-# get APR
-prompt(MESSAGES['apr'])
-
-apr = ''
-loop do
-  apr = gets.chomp
-  break if valid_decimal?(apr)
-  prompt(MESSAGES['valid_decimal'])
-end
-
-# get loan duration
-prompt(MESSAGES['loan_duration'])
-
-loan_duration_years = ''
-loop do
-  loan_duration_years = gets.chomp
-  break if valid_integer?(loan_duration_years)
-  prompt(MESSAGES['valid_integer'])
-end
-
-# calculate monthly interest rate
-monthly_interest = apr.to_f / 12.0
-puts "The monthly interest rate is #{monthly_interest}."
-
-# calculate loan duration in months
-loan_duration_months = loan_duration_years.to_i * 12
-puts "The loan duration is #{loan_duration_months} months"
-
-# use formula
-payment = monthly_payment(loan_amount, monthly_interest, loan_duration_months)
-puts "The monthly payment is $#{payment}."
+prompt(MESSAGES['goodbye'])
