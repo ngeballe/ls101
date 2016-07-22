@@ -21,12 +21,6 @@ def monthly_payment(loan_amount, monthly_interest_rate, loan_duration_months)
     (1 - (1 + monthly_interest_rate)**-loan_duration_months)
 end
 
-# tests
-# puts monthly_payment(100000, 0.0041666667, 360)
-# puts monthly_payment(30000, 0.06/12, 10*12)
-# puts monthly_payment(93246, 0.042/12, 13*12)
-# /tests
-
 prompt(MESSAGES['welcome'])
 
 loop do
