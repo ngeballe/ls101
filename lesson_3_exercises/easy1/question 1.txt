@@ -1,0 +1,17 @@
+Question 1
+
+What would you expect the code below to print out?
+
+  numbers = [1, 2, 2, 3]
+  numbers.uniq
+
+  puts numbers
+
+Answer: It should print out:
+  1
+  2
+  2
+  3
+
+uniq doesn't mutate the caller, so numbers still has both 2s in it.
+

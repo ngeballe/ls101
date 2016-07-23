@@ -1,0 +1,23 @@
+Question 2
+
+Describe the difference between ! and ? in Ruby. And explain what would happen in the following scenarios:
+
+1. what is != and where should you use it?
+2. put ! before something, like !user_name
+3. put ! after something, like words.uniq!
+4. put ? before something
+5. put ? after something
+6. put !! before something, like !!user_name
+
+Answer: "!" before an expression means NOT [expression]--i.e., if the expression evaluated to true, adding ! will make it false, and vice versa.
+By convention, method names ending with "!" mutate the caller (e.g., uniq!, map!, sort! changes the arrays they are called on), though this is not a rule.
+Methods ending in "?", by convention, are ones that return a boolean (e.g., odd? even?)
+
+1. != means "not equal to." It should be used when you're testing whether two things are not equal--e.g.:
+    >> puts "Not zero!" if my_variable != 0
+2. !something will be true if the something has a truthiness of false (if it evaluates to false or nil) and false otherwise.
+3. Putting ! after a method name makes it a different method. Often the method will be the same as the the one without the "!" except that it mutates the caller--e.g., map! vs. map, uniq! vs. uniq. But this is a convention rather than a rule. Adding "!" to a new method you invented will just give you a NoMethodError unless you defined a separate method with an exclamation point at the end.
+4. Putting ? before something will give you an error. It doesn't mean anything. [CORRECTION based on official answer: It could be part of the ternary operator ? : ]
+    >> my_var ? x = 6 : x = 10          # if my_var, then x = 6, else x = 10
+5. Putting ? at the end of a word implies that it's a method that returns a boolean.
+6. Putting !!something means NOT NOT something. The two negations cancel each other out, so "!!something" will be true if "something" has a truthiness of true (if it evaluates to anything other than nil or false), and false otherwise.
