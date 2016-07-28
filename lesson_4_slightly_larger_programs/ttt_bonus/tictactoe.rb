@@ -14,6 +14,11 @@ def prompt(msg)
   puts "=> #{msg}"
 end
 
+def joinor(arr, delimiter=', ', word='or')
+  arr[-1] = "#{word} #{arr.last}" if arr.size > 1
+  arr.size == 2 ? arr.join(' ') : arr.join(delimiter)
+end
+
 # rubocop:disable Metrics/AbcSize
 def display_board(brd)
   system 'clear'
@@ -41,6 +46,17 @@ def initialize_board
   # or Hash[(1..9).zip([" "]*9)]
 end
 
+def initialize_scores
+  { "Player" => 0, "Computer" => 0 }
+end
+
+def display_scores(scores)
+  puts "The score is:"
+  scores.each do |competitor, score|
+    puts "#{competitor} -- #{score}"
+  end
+end
+
 def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
@@ -48,7 +64,7 @@ end
 def player_marks_square!(brd)
   square = ''
   loop do
-    prompt "Choose a square (#{empty_squares(brd).join(', ')}):"
+    prompt "Choose a square (#{joinor(empty_squares(brd))}):"
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
     prompt "Sorry, that's not a valid choice"
@@ -80,7 +96,22 @@ def detect_winner(brd)
   nil
 end
 
+def update_scores!(scores, winner)
+  scores[winner] += 1
+end
+
+def someone_won_game?(scores)
+  !!detect_game_winner(scores)
+end
+
+def detect_game_winner(scores)
+  scores.keys.detect { |competitor| scores[competitor] == 5 }
+end
+
 prompt "Let's play Tic Tac Toe!"
+player_victories = 0
+computer_victories = 0
+scores = initialize_scores
 
 loop do
   board = initialize_board
@@ -98,9 +129,18 @@ loop do
   display_board(board)
 
   if someone_won?(board)
-    prompt "#{detect_winner(board)} won!"
+    winner = detect_winner(board)
+    prompt "#{winner} won!"
+    update_scores!(scores, winner)
   else
     puts "It's a tie."
+  end
+
+  display_scores(scores)
+
+  if someone_won_game?(scores)
+    prompt "#{detect_game_winner(scores)} won the game!"
+    break
   end
 
   prompt "Play again? (y or n)"

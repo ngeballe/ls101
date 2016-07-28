@@ -101,8 +101,8 @@ loop do
   board = [[" ", " ", " "],
            [" ", " ", " "],
            [" ", " ", " "]]
+
   loop do
-    # 1. Display the inital empty 3x3 board
     display(board)
     winner = winner(board, :user, :computer)
     if winner
@@ -113,7 +113,6 @@ loop do
       break
     end
 
-    # 2. Ask the user to mark a square
     user_choice = ''
     loop do
       prompt(MESSAGES["take_turn"])
