@@ -30,7 +30,7 @@ end
 
 def initialize_board
   new_board = {}
-  (1..9).each { |num| new_board[num] = INITIAL_MARKER}
+  (1..9).each { |num| new_board[num] = INITIAL_MARKER }
   new_board
   # or Hash[(1..9).zip([" "]*9)]
 end
@@ -59,33 +59,6 @@ def board_full?(brd)
   empty_squares(brd) == []
 end
 
-def horizontal_winner(brd)
-  [PLAYER_MARKER, COMPUTER_MARKER].each do |marker|
-    (0..2).each do |n|
-      return marker if brd.select { |k, v| (k - 1)/ 3 == n }.values.all? { |v| v == marker }
-    end
-  end
-  nil
-end
-
-def vertical_winner(brd)
-  [PLAYER_MARKER, COMPUTER_MARKER].each do |marker|
-    (0..2).each do |n|
-      return marker if brd.select { |k, v| k % 3 == n }.values.all? { |v| v == marker }
-    end
-  end
-  nil
-end
-
-def diagonal_winner(brd)
-  [PLAYER_MARKER, COMPUTER_MARKER].each do |marker|
-    [[1, 5, 9], [3, 5, 7]].each do |array_of_keys|
-      return marker if brd.select { |k, v| array_of_keys.include?(k) }.values.all? { |v| v == marker }
-    end
-  end
-  nil
-end
-
 def someone_won?(brd)
   !!detect_winner(brd)
 end
@@ -97,12 +70,12 @@ def detect_winner(brd)
                   [[1, 5, 9], [3, 5, 7]]              # diagonals
   winning_lines.each do |line|
     if brd[line[0]] == PLAYER_MARKER &&
-      brd[line[1]] == PLAYER_MARKER &&
-      brd[line[2]] == PLAYER_MARKER
+       brd[line[1]] == PLAYER_MARKER &&
+       brd[line[2]] == PLAYER_MARKER
       return 'Player'
     elsif brd[line[0]] == COMPUTER_MARKER &&
-      brd[line[1]] == COMPUTER_MARKER &&
-      brd[line[2]] == COMPUTER_MARKER
+          brd[line[1]] == COMPUTER_MARKER &&
+          brd[line[2]] == COMPUTER_MARKER
       return "Computer"
     end
   end
