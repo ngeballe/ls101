@@ -1,0 +1,12 @@
+Tic Tac Toe is a 2 player game played on a 3x3 board. Each player takes a turn and puts an X or an O in one of the squares. The first player to have three of their letters in a row (vertically, horizonttlly, or diagonally) wins the game. If all 9 squares are marked and no players has 3 in a row, then the game is a tie.
+
+1. Display the inital empty 3x3 board
+2. Ask the user to mark a square
+3. Computer marks a square
+4. Display the updated board state.
+5. If winner, display winner.
+6. If board is full, display tie.
+7. If neither winner nor full board, go to #2.
+8. Play again?
+9. If yes, go to #1
+10. Goodbye!

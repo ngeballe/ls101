@@ -1,0 +1,5 @@
+welcome: "Welcome to Tic Tac Toe. Let's play!"
+take_turn: "Choose a square to mark with an X. Enter the column letter and row number you want--for example: c2"
+square_occupied: "Invalid choice. That square is occupied."
+invalid_choice: "That's not a valid choice."
+goodbye: "Goodbye! Thanks for playing!"
