@@ -2,19 +2,15 @@ require 'pry'
 require 'yaml'
 MESSAGES = YAML.load_file('tictactoe_messages.yml')
 
-COLUMN_LETTERS_TO_NUMBERS = {"a" => 0, "b" => 1, "c" => 2}
+COLUMN_LETTERS_TO_NUMBERS = { "a" => 0, "b" => 1, "c" => 2 }.freeze
 
 def display(board)
   puts " " + %w(a b c).join("|")
-  board.each_with_index do |row, row_idx|
-    print row_idx + 1
-    row.each_with_index do |column, col_idx|
-      print column
-      print "|" unless col_idx == row.length - 1
-    end
-    print "\n"
-    puts "-"*6 unless row_idx == board.length - 1
-  end
+  puts "1" + board[0].join("|")
+  puts "-----"
+  puts "2" + board[1].join("|")
+  puts "-----"
+  puts "3" + board[2].join("|")
 end
 
 def prompt(message)
@@ -23,7 +19,7 @@ end
 
 def valid_choice?(user_choice)
   # must be 2 characters [a, b, c], then [1, 2, 3]
-  return false unless /^[abc][123]$/i.match(user_choice)
+  return false unless /^[abc][123]$/i =~ user_choice
   true
 end
 
@@ -52,10 +48,6 @@ end
 def square_occupied?(board, row_num, col_num)
   board[row_num][col_num] != " "
 end
-
-# def three_horizontally(letter)
-  
-# end
 
 def diagonal_winner(board, x_player, o_player)
   diagonal1 = [board[0][0], board[1][1], board[2][2]]
@@ -90,12 +82,6 @@ def winner(board, x_player, o_player)
   nil
 end
 
-# def winner_or_tie?(board)
-#   # is there a winner?
-#   # is a tie
-#   if 
-# end
-
 def display_winner(winner)
   case winner
   when :user
@@ -109,15 +95,12 @@ def full?(board)
   board.flatten.all? { |value| value != " " }
 end
 
-#p full?([["X", "X", "O"], ["X", "X", "X"], ["X", "O", "O"]]) # => true
-
-
 prompt(MESSAGES["welcome"])
 
 loop do
   board = [[" ", " ", " "],
-          [" ", " ", " "],
-          [" ", " ", " "]]
+           [" ", " ", " "],
+           [" ", " ", " "]]
   loop do
     # 1. Display the inital empty 3x3 board
     display(board)
@@ -154,7 +137,7 @@ loop do
 
     # break if winner(board, :user, :computer)
     winner = winner(board, :user, :computer)
-    if winner 
+    if winner
       display_winner(winner)
       break
     elsif full?(board)
@@ -171,9 +154,3 @@ loop do
 end
 
 prompt(MESSAGES["goodbbye"])
-# 5. If winner, display winner.
-# 6. If board is full, display tie.
-# 7. If neither winner nor full board, go to #2.
-# 8. Play again?
-# 9. If yes, go to #1
-# 10. Goodbye!
