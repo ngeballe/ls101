@@ -9,6 +9,7 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
 COMPUTER_MARKER = 'O'.freeze
+FIRST_MOVER = "choose".freeze
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -43,7 +44,6 @@ def initialize_board
   new_board = {}
   (1..9).each { |num| new_board[num] = INITIAL_MARKER }
   new_board
-  # or Hash[(1..9).zip([" "]*9)]
 end
 
 def initialize_scores
@@ -61,7 +61,7 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
-def player_marks_square!(brd)
+def player_mark_square!(brd)
   square = ''
   loop do
     prompt "Choose a square (#{joinor(empty_squares(brd))}):"
@@ -72,9 +72,49 @@ def player_marks_square!(brd)
   brd[square] = PLAYER_MARKER
 end
 
-def computer_marks_square!(brd)
-  square = empty_squares(brd).sample
+def find_at_risk_square(line, board, marker)
+  if board.values_at(*line).count(marker) == 2
+    board.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
+  else
+    nil
+  end
+end
+
+def computer_mark_square!(brd)
+  square = nil
+
+  # play offense--put the 3rd one down if it's about to win
+  WINNING_LINES.each do |line|
+    square = find_at_risk_square(line, brd, COMPUTER_MARKER)
+    break if square
+  end
+
+  if !square
+    # play defense--block if the player has two in a row
+    WINNING_LINES.each do |line|
+      square = find_at_risk_square(line, brd, PLAYER_MARKER)
+      break if square
+    end
+  end
+
+  if !square
+    square = 5 if brd[5] == INITIAL_MARKER
+  end
+
+  if !square
+    square = empty_squares(brd).sample
+  end
+
   brd[square] = COMPUTER_MARKER
+end
+
+def mark_square!(board, current_player)
+  case current_player
+  when "player"
+    player_mark_square!(board)
+  when "computer"
+    computer_mark_square!(board)
+  end
 end
 
 def board_full?(brd)
@@ -108,6 +148,10 @@ def detect_game_winner(scores)
   scores.keys.detect { |competitor| scores[competitor] == 5 }
 end
 
+def alternate_player(player)
+  player == "player" ? "computer" : "player"
+end
+
 prompt "Let's play Tic Tac Toe!"
 player_victories = 0
 computer_victories = 0
@@ -115,14 +159,22 @@ scores = initialize_scores
 
 loop do
   board = initialize_board
+  if FIRST_MOVER == "choose"
+    prompt "Do you want to go first? (y/n)"
+    answer = gets.chomp
+    if answer.downcase.start_with?('y')
+      current_player = "player"
+    else
+      current_player = "computer"
+    end
+  else
+    current_player = FIRST_MOVER
+  end
 
   loop do
     display_board(board)
-
-    player_marks_square!(board)
-    break if someone_won?(board) || board_full?(board)
-
-    computer_marks_square!(board)
+    mark_square!(board, current_player)
+    current_player = alternate_player(current_player)
     break if someone_won?(board) || board_full?(board)
   end
 
