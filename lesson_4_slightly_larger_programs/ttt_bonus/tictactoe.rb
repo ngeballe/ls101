@@ -95,39 +95,19 @@ def find_board_after_move(board, marker, square)
 end
 
 def minimax(board, marker)
-  # marker is for player whose turn it is
-  # If the game is over, return the score from computer's perspective.
-  if detect_winner(board) == "Computer"
-    return 1
-  elsif detect_winner(board) == "Player"
-    return -1
-  elsif board_full?(board)
-    return 0
-  else
-    # get a list of new game states for every possible move
-    marker = alternate_marker(marker)
-    possible_moves = empty_squares(board)
-    new_game_states = possible_moves.map do |square|
-      find_board_after_move(board, marker, square)
-    end
-    # create a scores list
-    scores_list = []
-    # For each of these states
-    new_game_states.each do |game_state|
-      # add the minimax result of that state to the scores list
-      scores_list << minimax(game_state, marker)
-    end
-    # If it's computer's turn, return the maximum score from the scores list
-    if marker == COMPUTER_MARKER
-      return scores_list.max
-    # If it's player's turn, return the minimum score from the scores list
-    elsif marker == PLAYER_MARKER
-      return scores_list.min
-    end
+  return 1 if detect_winner(board) == "Computer"
+  return -1 if detect_winner(board) == "Player"
+  return 0 if board_full?(board)
+  marker = alternate_marker(marker)
+  possible_moves = empty_squares(board)
+  new_game_states = possible_moves.map do |square|
+    find_board_after_move(board, marker, square)
   end
-  # Otherwise get a list of new game states for every possible move
-  # If it's X's turn, return the maximum score from the scores list
-  # If it's O's turn, return the minimum score from the scores list
+  scores_list = []
+  new_game_states.each do |game_state|
+    scores_list << minimax(game_state, marker)
+  end
+  (marker == COMPUTER_MARKER) ? scores_list.max : scores_list.min
 end
 
 def find_best_square_to_mark(board, marker)
