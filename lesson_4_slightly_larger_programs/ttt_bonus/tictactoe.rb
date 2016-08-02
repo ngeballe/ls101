@@ -9,8 +9,7 @@ WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
 COMPUTER_MARKER = 'O'.freeze
-# FIRST_MOVER = "choose".freeze
-FIRST_MOVER = "Computer".freeze
+FIRST_MOVER = "Choose".freeze # Choose, Computer, or Player
 PLAYER_NAMES_TO_MARKERS = { "Player" => PLAYER_MARKER,
                             "Computer" => COMPUTER_MARKER }.freeze
 MARKERS_TO_PLAYERS = { PLAYER_MARKER => "Player",
@@ -181,7 +180,7 @@ scores = initialize_scores
 loop do
   board = initialize_board
 
-  if FIRST_MOVER == "choose"
+  if FIRST_MOVER == "Choose"
     prompt "Do you want to go first? (y/n)"
     answer = gets.chomp
     player_go_first = answer.downcase.start_with?('y')
