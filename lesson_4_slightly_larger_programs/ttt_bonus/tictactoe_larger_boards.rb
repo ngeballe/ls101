@@ -9,12 +9,12 @@ PLAYER_NAMES_TO_MARKERS = { "Player" => PLAYER_MARKER,
 MARKERS_TO_PLAYERS = { PLAYER_MARKER => "Player",
                        COMPUTER_MARKER => "Computer" }.freeze
 
-BOARD_HEIGHT = 9 # 5
-BOARD_WIDTH = 9 # 5
-NUM_TO_WIN = 5 # number in a row required to win # 3
+BOARD_HEIGHT = 5 # 5
+BOARD_WIDTH = 10 # 5
+NUM_TO_WIN = 4 # number in a row required to win # 3
 SHOW_SQUARE_NUMBERS = true
 
-CENTER_SQUARE = ''
+CENTER_SQUARE = ''.freeze
 CENTER_ROW = BOARD_HEIGHT / 2 + 1
 CENTER_COLUMN = BOARD_WIDTH / 2 + 1
 CENTER_SQUARE = (CENTER_ROW - 1) * BOARD_WIDTH + CENTER_COLUMN
@@ -135,9 +135,7 @@ end
 
 def find_at_risk_square(line, board, marker)
   if board.values_at(*line).count(marker) == NUM_TO_WIN - 1
-    board.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
-  else
-    nil
+    board.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   end
 end
 
@@ -182,7 +180,7 @@ def find_squares_that_create_threat(board, marker)
       threat_creators << square
     end
   end
-  threat_creators  
+  threat_creators
 end
 
 def find_move_to_block_threat(board, marker_for_threatening_player)
@@ -227,7 +225,7 @@ def computer_mark_square!(board)
   square = nil
 
   # center_square = board.size / 2 + 1
-  
+
   square = CENTER_SQUARE if board.values.count(INITIAL_MARKER) == board.values.size # first turn
 
   if !square
@@ -301,7 +299,7 @@ def computer_mark_square!(board)
   end
 
   # choose a random square with neighbors
-  if !square  
+  if !square
     square = squares_with_neighbors.sample
   end
 
@@ -315,7 +313,7 @@ def computer_mark_square!(board)
   if !square
     square = empty_squares(board).sample
   end
-  
+
   # use minimax
   if !square
     square = find_best_square_with_minimax(board, COMPUTER_MARKER) # if !square
@@ -364,33 +362,58 @@ def detect_game_winner(scores)
   scores.keys.detect { |competitor| scores[competitor] == 5 }
 end
 
-def initialize_winning_lines
-  squares = (1..BOARD_WIDTH*BOARD_HEIGHT).to_a
-  winning_lines = []
-  # add horizontal lines
-  squares.each_slice(BOARD_WIDTH) do |row_of_squares| 
+def add_horizontal_winning_lines!(winning_lines, squares)
+  squares.each_slice(BOARD_WIDTH) do |row_of_squares|
     row_of_squares.each_cons(NUM_TO_WIN).each do |horizontal_line|
       winning_lines << horizontal_line
     end
   end
-  # add vertical lines
-  columns = (1..BOARD_WIDTH).map { |column_num| column_num.step(squares.size, BOARD_WIDTH).to_a }
-  columns.each do |column|
-    column.each_cons(NUM_TO_WIN).each { |vertical_line| winning_lines << vertical_line }
+end
+
+def add_vertical_winning_lines!(winning_lines, squares)
+  columns = (1..BOARD_WIDTH).map do |column_num|
+    column_num.step(squares.size, BOARD_WIDTH).to_a
   end
-  # add diagonal lines
-  squares.each_slice(BOARD_WIDTH).with_index do |row_of_squares, idx|
-    if idx <= BOARD_HEIGHT - NUM_TO_WIN
-      # southeast diags (top-left to bottom-right)
-      row_of_squares[0..-NUM_TO_WIN].each do |diag_start|
-        winning_lines << diag_start.step(diag_start + (BOARD_WIDTH + 1) * (NUM_TO_WIN - 1), (BOARD_WIDTH + 1)).to_a
+  columns.each do |column|
+    column.each_cons(NUM_TO_WIN).each do |vertical_line|
+      winning_lines << vertical_line
+    end
+  end
+end
+
+def find_diagonal(start, top_left_to_bottom_right)
+  if top_left_to_bottom_right
+    (0..NUM_TO_WIN - 1).map do |n|
+      start + (BOARD_WIDTH + 1) * n
+    end
+  else
+    (0..NUM_TO_WIN - 1).map do |n|
+      start + (BOARD_WIDTH - 1) * n
+    end
+  end
+end
+
+def add_diagonal_winning_lines!(winning_lines, squares)
+  squares.each_slice(BOARD_WIDTH).with_index do |row_of_squares, row_idx|
+    if row_idx <= BOARD_HEIGHT - NUM_TO_WIN
+      row_of_squares[0..-NUM_TO_WIN].each do |diag_start| # \ diags
+        winning_lines << find_diagonal(diag_start, true)
       end
-      # southwest diags (top-right to bottom left)
-      row_of_squares[NUM_TO_WIN-1..-1].each do |diag_start|
-        winning_lines << diag_start.step(diag_start + (BOARD_WIDTH - 1) * (NUM_TO_WIN - 1), (BOARD_WIDTH - 1)).to_a
+      row_of_squares[NUM_TO_WIN - 1..-1].each do |diag_start| # / diags
+        winning_lines << find_diagonal(diag_start, false)
       end
     end
   end
+end
+
+def initialize_winning_lines
+  squares = (1..BOARD_WIDTH * BOARD_HEIGHT).to_a
+  winning_lines = []
+
+  add_horizontal_winning_lines!(winning_lines, squares)
+  add_vertical_winning_lines!(winning_lines, squares)
+  add_diagonal_winning_lines!(winning_lines, squares)
+
   winning_lines
 end
 
@@ -443,5 +466,3 @@ loop do
 end
 
 prompt "Good-bye! Thanks for playing."
-
-
