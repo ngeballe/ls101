@@ -3,7 +3,7 @@ require 'pry'
 INITIAL_MARKER = ' '.freeze
 PLAYER_MARKER = 'X'.freeze
 COMPUTER_MARKER = 'O'.freeze
-FIRST_MOVER = "Computer".freeze # Choose, Computer, or Player
+FIRST_MOVER = "Player".freeze # Choose, Computer, or Player
 PLAYER_NAMES_TO_MARKERS = { "Player" => PLAYER_MARKER,
                             "Computer" => COMPUTER_MARKER }.freeze
 MARKERS_TO_PLAYERS = { PLAYER_MARKER => "Player",
@@ -36,24 +36,29 @@ def alternate_player(player)
   player == "Player" ? "Computer" : "Player"
 end
 
+def display_square_numbers(square_nums)
+  square_nums_padded = square_nums.map do |num|
+    num.to_s.size == 2 ? num.to_s + " " * 3 : num.to_s + " " * 4
+  end
+  puts square_nums_padded.join("|")
+end
+
 # rubocop:disable Metrics/AbcSize
 def display_board(board)
   system 'clear'
-  puts "You are #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}"
-  puts ""
+  puts "You are #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}\n"
   board.keys.each_slice(BOARD_WIDTH) do |square_nums|
     if SHOW_SQUARE_NUMBERS
-      square_nums_padded = square_nums.map do |num|
-        num.to_s.size == 2 ? num.to_s + " " * 3 : num.to_s + " " * 4
-      end
-      puts square_nums_padded.join("|")
+      display_square_numbers(square_nums)
     else
-      puts (" " * 5 + "|") * (BOARD_WIDTH - 1)
+      puts((" " * 5 + "|") * (BOARD_WIDTH - 1))
     end
-    values_for_row = board.values_at(*square_nums)
-    puts values_for_row.map { |v| "  #{v}  " }.join("|")
-    puts (" " * 5 + "|") * (BOARD_WIDTH - 1)
-    puts (["-----"] * BOARD_WIDTH).join("+") unless square_nums.last == board.size
+    # display values for row
+    puts board.values_at(*square_nums).map { |v| "  #{v}  " }.join("|")
+    puts((" " * 5 + "|") * (BOARD_WIDTH - 1))
+    unless square_nums.last == board.size
+      puts((["-----"] * BOARD_WIDTH).join("+"))
+    end
   end
   puts ""
 end
@@ -89,30 +94,56 @@ def empty_squares(board)
   board.keys.select { |num| board[num] == INITIAL_MARKER }
 end
 
-def find_neighbors(square_num, board)
+def find_left_side_neighbors(square_num, board)
   neighbors = []
-  # top
-  neighbors << square_num - BOARD_WIDTH unless square_num <= BOARD_WIDTH
-  # bottom
-  neighbors << square_num + BOARD_WIDTH unless square_num + BOARD_WIDTH > board.size
-  # left side
   unless square_num % BOARD_WIDTH == 1
     neighbors << square_num - 1
-    neighbors << square_num - BOARD_WIDTH - 1 unless square_num <= BOARD_WIDTH
-    neighbors << square_num + BOARD_WIDTH - 1 unless square_num + BOARD_WIDTH > board.size
-  end
-  # right side
-  unless square_num % BOARD_WIDTH == 0
-    neighbors << square_num + 1
-    neighbors << square_num - BOARD_WIDTH + 1 unless square_num <= BOARD_WIDTH
-    neighbors << square_num + BOARD_WIDTH + 1 unless square_num + BOARD_WIDTH > board.size
+    unless square_num <= BOARD_WIDTH
+      neighbors << square_num - BOARD_WIDTH - 1
+    end
+    unless square_num + BOARD_WIDTH > board.size
+      neighbors << square_num + BOARD_WIDTH - 1
+    end
   end
   neighbors
 end
 
+def find_right_side_neighbors(square_num, board)
+  neighbors = []
+  unless square_num % BOARD_WIDTH == 0
+    neighbors << square_num + 1
+    unless square_num <= BOARD_WIDTH # if it's in first row
+      neighbors << square_num - BOARD_WIDTH + 1
+    end
+    unless square_num + BOARD_WIDTH > board.size
+      neighbors << square_num + BOARD_WIDTH + 1
+    end
+  end
+  neighbors
+end
+
+def find_neighbors(square_num, board)
+  neighbors = []
+  # top
+  unless square_num <= BOARD_WIDTH
+    neighbors << square_num - BOARD_WIDTH
+  end
+  # bottom
+  unless square_num + BOARD_WIDTH > board.size
+    neighbors << square_num + BOARD_WIDTH
+  end
+  # left side
+  neighbors << find_left_side_neighbors(square_num, board)
+  neighbors << find_right_side_neighbors(square_num, board)
+  # right side
+  neighbors.flatten
+end
+
 def squares_with_neighbors(board)
   empty_squares(board).reject do |square|
-    find_neighbors(square, board).all? { |neighbor| board[neighbor] == INITIAL_MARKER }
+    find_neighbors(square, board).all? do |neighbor|
+      board[neighbor] == INITIAL_MARKER
+    end
   end
 end
 
@@ -152,7 +183,7 @@ def find_all_at_risk_squares(board, marker)
   end
 end
 
-def double_threat?(board, marker)
+def fork?(board, marker)
   at_risk_squares = find_all_at_risk_squares(board, marker)
   at_risk_squares && at_risk_squares.length >= 2
 end
@@ -162,10 +193,10 @@ def threat?(board, marker)
   at_risk_squares && at_risk_squares.length >= 1
 end
 
-def find_a_square_that_creates_double_threat(board, marker)
+def find_fork_creator(board, marker)
   empty_squares(board).each do |square|
     board_after_move = find_board_after_move(board, marker, square)
-    if double_threat?(board_after_move, marker)
+    if fork?(board_after_move, marker)
       return square
     end
   end
@@ -208,6 +239,7 @@ def minimax(board, marker)
 end
 
 def find_best_square_with_minimax(board, marker)
+  return nil unless BOARD_WIDTH <= 3 && BOARD_HEIGHT <= 3
   squares_to_search = empty_squares(board)
   move_scores = {}
   squares_to_search.each do |square|
@@ -221,103 +253,72 @@ def find_best_square_with_minimax(board, marker)
   end
 end
 
+def find_winning_square(board, marker)
+  WINNING_LINES.each do |line|
+    square = find_at_risk_square(line, board, marker)
+    return square if square
+  end
+  nil
+end
+
+def find_square_to_set_stage_for_fork(board, marker)
+  find_squares_that_create_threat(board, marker).each do |threat_creator|
+    board_after_move =
+      find_board_after_move(board, marker, threat_creator)
+    # find board after player blocks threat
+    players_block = find_move_to_block_threat(board, marker)
+    # square = player's countermove
+    board_after_countermove =
+      find_board_after_move(board_after_move, alternate_marker(marker),
+                            players_block)
+    # don't make this move if it would lead opponent to fork
+    next if fork?(board_after_countermove, alternate_marker(marker))
+    # make sure that player can't just win
+    next if threat?(board_after_countermove, alternate_marker(marker))
+    # see if board after countermove gives lets computer fork
+    fork_creator = find_fork_creator(board_after_countermove, marker)
+    next unless fork_creator
+    square = threat_creator
+    return square
+  end
+  nil
+end
+
+def num_squares_marked(board)
+  board.size - board.values.count(INITIAL_MARKER)
+end
+
 def computer_mark_square!(board)
-  square = nil
+  # choose center square at start of game
+  square = (num_squares_marked(board) == 0) ? CENTER_SQUARE : nil
 
-  # center_square = board.size / 2 + 1
+  # play offense--put the last one down if it's about to win
+  square = find_winning_square(board, COMPUTER_MARKER) unless square
 
-  square = CENTER_SQUARE if board.values.count(INITIAL_MARKER) == board.values.size # first turn
-
-  if !square
-    # play offense--put the last one down if it's about to win
-    WINNING_LINES.each do |line|
-      square = find_at_risk_square(line, board, COMPUTER_MARKER)
-      break if square
-    end
-  end
-
-  if !square
-    # play defense--block if the player has two in a row
-    # WINNING_LINES.each do |line|
-    #   square = find_at_risk_square(line, board, PLAYER_MARKER)
-    #   break if square
-    # end
-    square = find_move_to_block_threat(board, PLAYER_MARKER)
-  end
+  # play defense--block if the player has two in a row
+  square = find_move_to_block_threat(board, PLAYER_MARKER) unless square
 
   # if feasible, do minimax
-  if !square && BOARD_WIDTH <= 3 && BOARD_HEIGHT <= 3
-    square = find_best_square_with_minimax(board, COMPUTER_MARKER) if !square
-  end
+  square = find_best_square_with_minimax(board, COMPUTER_MARKER) unless square
 
-  # try to create double threats (situation where computer makes two immediate threats so the player can't block both)
+  # try to create a fork (double threat)
   if !square && board.values.count(COMPUTER_MARKER) >= NUM_TO_WIN - 2
-    double_threat_creator = find_a_square_that_creates_double_threat(board, COMPUTER_MARKER)
-    square = double_threat_creator if double_threat_creator
+    fork_creator = find_fork_creator(board, COMPUTER_MARKER)
+    square = fork_creator if fork_creator
   end
 
-  # see if it can find a move that will lead do a double threat when players respond to threats
+  # see if it can set up a fork after players respond to threats
   if !square && board.values.count(COMPUTER_MARKER) >= 1
-    threat_creators = find_squares_that_create_threat(board, COMPUTER_MARKER)
-    threat_creators.each do |threat_creator|
-      # THIS WILL ONLY CHECK OUT FIRST SQUARE THAT CREATES THREAT
-      board_after_move = find_board_after_move(board, COMPUTER_MARKER, threat_creator)
-      # find board after player blocks threat
-      players_defensive_square = nil
-      WINNING_LINES.each do |line|
-        players_defensive_square = find_at_risk_square(line, board_after_move, COMPUTER_MARKER)
-        break if players_defensive_square
-      end
-      # square = player's countermove
-      board_after_countermove = find_board_after_move(board_after_move, PLAYER_MARKER, players_defensive_square)
-      # if the player would now be making a double threat, the computer shouldn't make this move
-      if double_threat?(board_after_countermove, PLAYER_MARKER)
-        next
-      end
-      # see if board after countermove gives computer the chance to make a double threat
-      # but make sure that the computer CAN make a double threat in that scenario, that it wouldn't need to just let the computer win
-      double_threat_creator = find_a_square_that_creates_double_threat(board_after_countermove, COMPUTER_MARKER)
-      is_there_threat_there = threat?(board_after_countermove, PLAYER_MARKER)
-      if double_threat_creator && !threat?(board_after_countermove, PLAYER_MARKER)
-        square = threat_creator # use the threat creator as square if it sets up a double threat
-        break if square
-      end
-    end
+    square = find_square_to_set_stage_for_fork(board, COMPUTER_MARKER)
   end
-
-  squares_with_neighbors = squares_with_neighbors(board)
 
   # preempt double threat
-  if !square
-    potential_double_threat = find_a_square_that_creates_double_threat(board, PLAYER_MARKER)
-    square = potential_double_threat if potential_double_threat # block that square to preempt double threat
-    # binding.pry
-    # empty_squares(board).each do |opponents_potential_move|
-    #   board_after_move = find_board_after_move(board, PLAYER_MARKER, opponents_potential_move)
-    #   opponents_double_threat_creator = find_a_square_that_creates_double_threat(board_after_move, PLAYER_MARKER)
-    # end
-  end
+  # potential_fork = find_fork_creator(board, PLAYER_MARKER)
+  # block that square to preempt double threat
+  square = find_fork_creator(board, PLAYER_MARKER) unless square
 
   # choose a random square with neighbors
-  if !square
-    square = squares_with_neighbors.sample
-  end
-
-  # use minimax with squares adjacent to markers to cut down on search time
-  # if !square
-  #   squares_with_neighbors = find_neighbors()
-  #   square = find_best_square_with_minimax(board, COMPUTER_MARKER)
-  # end
-
-  # random
-  if !square
-    square = empty_squares(board).sample
-  end
-
-  # use minimax
-  if !square
-    square = find_best_square_with_minimax(board, COMPUTER_MARKER) # if !square
-  end
+  square = squares_with_neighbors(board).sample unless square
 
   board[square] = COMPUTER_MARKER
 end
