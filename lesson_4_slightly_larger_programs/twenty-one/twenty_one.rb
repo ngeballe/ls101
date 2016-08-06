@@ -1,10 +1,9 @@
 require 'pry'
 
-# SUITS = %w(hearts diamonds clubs spades)
-VALUES = (2..10).to_a.map { |n| n.to_s } + %w(Jack Queen King Ace).flatten
+CARDS = (2..10).to_a.map(&:to_s) + %w(Jack Queen King Ace).flatten
 
 def points(card)
-  case card 
+  case card
   when "2".."10"
     card.to_i
   when "Jack", "Queen", "King"
@@ -18,8 +17,8 @@ end
 
 def initialize_deck
   deck = []
-  VALUES.each do |value|
-    4.times { deck << value }
+  CARDS.each do |card|
+    4.times { deck << card }
   end
   deck.shuffle # :)
 end
@@ -33,9 +32,11 @@ end
 def show_hands(hands, end_of_game=false)
   dealer_hand = hands[:dealer]
   player_hand = hands[:player]
+  dealer_points = points_in_hand(dealer_hand)
+  player_points = points_in_hand(player_hand)
   if end_of_game
-    puts "Dealer has: #{joinand(dealer_hand)} for a total of #{points_in_hand(dealer_hand)}"
-    puts "You have: #{joinand(player_hand)} for a total of #{points_in_hand(player_hand)}"
+    puts "Dealer has: #{joinand(dealer_hand)} for a total of #{dealer_points}"
+    puts "You have: #{joinand(player_hand)} for a total of #{player_points}"
   else
     puts "Dealer has: #{joinand(dealer_hand[0..-2])} and unknown card"
     puts "You have: #{joinand(player_hand)}"
@@ -44,17 +45,14 @@ end
 
 def points_in_hand(hand)
   points = 0
-  num_aces = hand.count("Ace")
   aces, non_aces = hand.partition { |card| card == "Ace" }
   points = non_aces.map { |card| points(card) }.reduce(0, :+)
-  aces.each do |ace|
-    if points + 11 > 21
-      # puts "Ace counted as 1"
-      points += 1
-    else
-      # puts "Ace counted as 11"
-      points += 11
-    end
+  aces.each do
+    points += if points > 10
+                1
+              else
+                11
+              end
   end
   points
 end
@@ -64,7 +62,8 @@ def bust?(hand)
 end
 
 def find_winner(hands)
-  player_hand, dealer_hand = hands[:player], hands[:dealer]
+  player_hand = hands[:player]
+  dealer_hand = hands[:dealer]
   player_points = points_in_hand(player_hand)
   dealer_points = points_in_hand(dealer_hand)
   if bust?(player_hand)
@@ -107,7 +106,7 @@ hands = { player: [], dealer: [] }
 2.times { deal_card!(:dealer, deck, hands) }
 
 # player turn
-player_choice = ''
+player_choice = nil
 loop do
   show_hands(hands)
   prompt "Do you want to hit or stay?"
@@ -125,14 +124,13 @@ end
 
 puts
 if bust?(hands[:player])
-  puts "You busted. The dealer won."
-  puts
+  puts "You busted."
   winner = "Dealer"
   show_hands(hands, true)
 else
   # dealer turn
   loop do
-    show_hands(hands, true)   
+    show_hands(hands, true)
     if points_in_hand(hands[:dealer]) < 17
       puts "Dealer chose hit"
       deal_card!(:dealer, deck, hands)
@@ -142,20 +140,18 @@ else
       break
     end
   end
-  puts
   if bust?(hands[:dealer])
     winner = "Player"
-    puts "The dealer busted. You won!"
-    puts
+    puts "The dealer busted."
     show_hands(hands, true)
   else
     # compare hands
     winner = find_winner(hands)
-    prompt "Dealer has: #{hands[:dealer].join(", ")}"
+    prompt "Dealer has: #{hands[:dealer].join(', ')}"
     prompt "The dealer's hand adds up to #{points_in_hand(hands[:dealer])}"
-    prompt "You have: #{hands[:player].join(", ")}"
+    prompt "You have: #{hands[:player].join(', ')}"
     prompt "Your hand adds up to #{points_in_hand(hands[:player])}"
-
-    display_winner(winner)
   end
 end
+puts
+display_winner(winner)
