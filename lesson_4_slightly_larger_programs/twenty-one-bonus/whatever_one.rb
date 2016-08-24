@@ -4,6 +4,9 @@ SUITS = ['H', 'D', 'S', 'C'].freeze
 VALUES = ['2', '3', '4', '5', '6', '7', '8', '9',
           '10', 'J', 'Q', 'K', 'A'].freeze
 
+LIMIT = 21
+DEALER_HIT_LIMIT = 17
+
 def prompt(msg)
   puts "=> #{msg}"
 end
@@ -32,14 +35,14 @@ def total(cards)
 
   # correct for Aces
   values.select { |value| value == "A" }.count.times do
-    sum -= 10 if sum > 21
+    sum -= 10 if sum > LIMIT
   end
 
   sum
 end
 
 def busted?(cards)
-  total(cards) > 21
+  total(cards) > LIMIT
 end
 
 # :tie, :dealer, :player, :dealer_busted, :player_busted
@@ -47,9 +50,9 @@ def detect_result(dealer_cards, player_cards)
   player_total = total(player_cards)
   dealer_total = total(dealer_cards)
 
-  if player_total > 21
+  if player_total > LIMIT
     :player_busted
-  elsif dealer_total > 21
+  elsif dealer_total > LIMIT
     :dealer_busted
   elsif dealer_total < player_total
     :player
@@ -75,6 +78,18 @@ def display_result(dealer_cards, player_cards)
   end
 end
 
+def display_cards_and_totals(dealer_cards, player_cards)
+  puts "=============="
+  prompt "Dealer has #{dealer_cards}, for a total of: #{total(dealer_cards)}"
+  prompt "Player has #{player_cards}, for a total of: #{total(player_cards)}"
+  puts "=============="
+end
+
+def display_full_results(dealer_cards, player_cards)
+  display_cards_and_totals(dealer_cards, player_cards)
+  display_result(dealer_cards, player_cards)
+end
+
 def play_again?
   puts "-------------"
   prompt "Do you want to play again? (y or n)"
@@ -82,9 +97,60 @@ def play_again?
   answer.downcase.start_with?("y")
 end
 
-loop do
-  prompt "Welcome to Twenty-One!"
+def initialize_scores
+  { "Player" => 0, "Dealer" => 0 }
+end
 
+def update_scores!(scores, dealer_cards, player_cards)
+  case detect_result(dealer_cards, player_cards)
+  when :player, :dealer_busted
+    scores["Player"] += 1
+  when :dealer, :player_busted
+    scores["Dealer"] += 1
+  end
+end
+
+def display_updated_scores(scores, dealer_cards, player_cards)
+  update_scores!(scores, dealer_cards, player_cards)
+  puts "-------------"
+  puts "The score is:"
+  scores.each do |competitor, score|
+    puts "#{competitor} -- #{score}"
+  end
+end
+
+def someone_won_game?(scores)
+  !!detect_game_winner(scores)
+end
+
+def detect_game_winner(scores)
+  if scores["Player"] == 5
+    :player
+  elsif scores["Dealer"] == 5
+    :dealer
+  end
+end
+
+def display_game_winner(scores)
+  case detect_game_winner(scores)
+  when :player
+    prompt "Player won the game!"
+  when :dealer
+    prompt "Dealer won the game!"
+  end
+end
+
+def join(array, separator)
+  # joins items but not items within items (unlike regular join)
+  # [[a, b], [c, d]] => [a, b] and [c, d]
+  array.reduce { |result, item| "#{result} #{separator} #{item}" }
+end
+
+prompt "Welcome to #{LIMIT}!"
+
+scores = initialize_scores
+
+loop do
   # initialize vars
   deck = initialize_deck
   player_cards = []
@@ -98,7 +164,7 @@ loop do
 
   prompt "Dealer has #{dealer_cards[0]} and ?"
   player_total = total(player_cards)
-  prompt "You have #{player_cards[0]} and #{player_cards[1]}, for a total of #{player_total}"
+  prompt "You have #{join(player_cards, 'and')}, for a total of #{player_total}"
 
   # player turn
   loop do
@@ -114,24 +180,27 @@ loop do
       player_cards << deck.pop
       prompt "You chose to hit!"
       prompt "Your cards are now: #{player_cards}"
-      prompt "Your total is now: #{total(player_cards)}"
+      player_total = total(player_cards) # total has changed, so update it
+      prompt "Your total is now: #{player_total}"
     end
 
     break if player_turn == 's' || busted?(player_cards)
   end
 
   if busted?(player_cards)
-    display_result(dealer_cards, player_cards)
+    display_full_results(dealer_cards, player_cards)
+    display_updated_scores(scores, dealer_cards, player_cards)
+    break if someone_won_game?(scores)
     play_again? ? next : break
   else
-    prompt "You stayed at #{total(player_cards)}"
+    prompt "You stayed at #{player_total}"
   end
 
   # dealer turn
   prompt "Dealer turn..."
 
   loop do
-    break if busted?(dealer_cards) || total(dealer_cards) >= 17
+    break if busted?(dealer_cards) || total(dealer_cards) >= DEALER_HIT_LIMIT
 
     prompt "Dealer hits!"
     dealer_cards << deck.pop
@@ -141,21 +210,24 @@ loop do
   dealer_total = total(dealer_cards)
   if busted?(dealer_cards)
     prompt "Dealer total is now: #{dealer_total}"
-    display_result(dealer_cards, player_cards)
+    display_full_results(dealer_cards, player_cards)
+    display_updated_scores(scores, dealer_cards, player_cards)
+    break if someone_won_game?(scores)
     play_again? ? next : break
   else
     prompt "Dealer stays at #{dealer_total}"
   end
 
   # compare cards
-  puts "=============="
-  prompt "Dealer has #{dealer_cards}, for a total of: #{total(dealer_cards)}"
-  prompt "Player has #{player_cards}, for a total of: #{total(player_cards)}"
-  puts "=============="
+  display_full_results(dealer_cards, player_cards)
+  display_updated_scores(scores, dealer_cards, player_cards)
 
-  display_result(dealer_cards, player_cards)
-
+  break if someone_won_game?(scores)
   break unless play_again?
+end
+
+if someone_won_game?(scores)
+  display_game_winner(scores)
 end
 
 prompt "Thank you for playing Twenty-One! Goodbye!"

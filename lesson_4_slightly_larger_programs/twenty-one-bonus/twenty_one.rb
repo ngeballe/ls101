@@ -75,6 +75,18 @@ def display_result(dealer_cards, player_cards)
   end
 end
 
+def display_cards_and_totals(dealer_cards, player_cards)
+  puts "=============="
+  prompt "Dealer has #{dealer_cards}, for a total of: #{total(dealer_cards)}"
+  prompt "Player has #{player_cards}, for a total of: #{total(player_cards)}"
+  puts "=============="
+end
+
+def display_full_results(dealer_cards, player_cards)
+  display_cards_and_totals(dealer_cards, player_cards)
+  display_result(dealer_cards, player_cards)
+end
+
 def play_again?
   puts "-------------"
   prompt "Do you want to play again? (y or n)"
@@ -82,9 +94,54 @@ def play_again?
   answer.downcase.start_with?("y")
 end
 
-loop do
-  prompt "Welcome to Twenty-One!"
+def initialize_scores
+  { "Player" => 0, "Dealer" => 0 }
+end
 
+def update_scores!(scores, dealer_cards, player_cards)
+  case detect_result(dealer_cards, player_cards)
+  when :player, :dealer_busted
+    scores["Player"] += 1
+  when :dealer, :player_busted
+    scores["Dealer"] += 1
+  end
+end
+
+def display_updated_scores(scores, dealer_cards, player_cards)
+  update_scores!(scores, dealer_cards, player_cards)
+  puts "-------------"
+  puts "The score is:"
+  scores.each do |competitor, score|
+    puts "#{competitor} -- #{score}"
+  end
+end
+
+def someone_won_game?(scores)
+  !!detect_game_winner(scores)
+end
+
+def detect_game_winner(scores)
+  if scores["Player"] == 5
+    :player
+  elsif scores["Dealer"] == 5
+    :dealer
+  end
+end
+
+def display_game_winner(scores)
+  case detect_game_winner(scores)
+  when :player
+    prompt "Player won the game!"
+  when :dealer
+    prompt "Dealer won the game!"
+  end
+end
+
+prompt "Welcome to Twenty-One!"
+
+scores = initialize_scores
+
+loop do
   # initialize vars
   deck = initialize_deck
   player_cards = []
@@ -114,17 +171,20 @@ loop do
       player_cards << deck.pop
       prompt "You chose to hit!"
       prompt "Your cards are now: #{player_cards}"
-      prompt "Your total is now: #{total(player_cards)}"
+      player_total = total(player_cards) # total has changed, so update it
+      prompt "Your total is now: #{player_total}"
     end
 
     break if player_turn == 's' || busted?(player_cards)
   end
 
   if busted?(player_cards)
-    display_result(dealer_cards, player_cards)
+    display_full_results(dealer_cards, player_cards)
+    display_updated_scores(scores, dealer_cards, player_cards)
+    break if someone_won_game?(scores)
     play_again? ? next : break
   else
-    prompt "You stayed at #{total(player_cards)}"
+    prompt "You stayed at #{player_total}"
   end
 
   # dealer turn
@@ -141,21 +201,24 @@ loop do
   dealer_total = total(dealer_cards)
   if busted?(dealer_cards)
     prompt "Dealer total is now: #{dealer_total}"
-    display_result(dealer_cards, player_cards)
+    display_full_results(dealer_cards, player_cards)
+    display_updated_scores(scores, dealer_cards, player_cards)
+    break if someone_won_game?(scores)
     play_again? ? next : break
   else
     prompt "Dealer stays at #{dealer_total}"
   end
 
   # compare cards
-  puts "=============="
-  prompt "Dealer has #{dealer_cards}, for a total of: #{total(dealer_cards)}"
-  prompt "Player has #{player_cards}, for a total of: #{total(player_cards)}"
-  puts "=============="
+  display_full_results(dealer_cards, player_cards)
+  display_updated_scores(scores, dealer_cards, player_cards)
 
-  display_result(dealer_cards, player_cards)
-
+  break if someone_won_game?(scores)
   break unless play_again?
+end
+
+if someone_won_game?(scores)
+  display_game_winner(scores)
 end
 
 prompt "Thank you for playing Twenty-One! Goodbye!"

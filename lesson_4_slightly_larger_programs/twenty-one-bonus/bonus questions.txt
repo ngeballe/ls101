@@ -1,0 +1,16 @@
+bonus questions
+
+1. Why can't we just replace all calls to total with a local variable? What's the key to watch out for when using a local variable to cache expensive calculations?
+
+A: You have to update the local variable with the total method after the player chooses hit, because the total has changed.
+
+2. We use the play_again? three times: after the player busts, after the dealer busts, or after both participants stay and compare cards. Why is the last call to play_again? a little different from the previous two?
+
+A: The last call is at the end of the loop, so we don't need the ternary operator. If the users chooses to play_again? and play_again? returns true, the program will go back to the beginning of the loop anyway; there's no need to use "next" as in the previous calls to play_again?.
+
+3. Ending the round. As mentioned above, there are 3 places where the round can end and we call play_again? each time. But another improvement we'd like to make is to give it a consistent end-of-round output. Right now, we get a grand output only after comparing cards. Can we extract this to a method and use it in the other two end-of-round areas?
+
+A: See code. I put the code in a display_cards_and_totals method. I wrapped that along with display_result in a new display_full_results method to reduce repetition.
+
+
+
