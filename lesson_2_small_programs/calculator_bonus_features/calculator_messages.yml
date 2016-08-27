@@ -7,7 +7,8 @@ en:
   second_number: "What's the second number?"
   valid_number: "Hmmmmm... that doesn't look like a valid number"
   valid_operator: "Must choose 1, 2, 3, or 4"
-  another_calculation: "Do you want to perform another calculation? (Y to calculate again)"
+  another_calculation: "Do you want to perform another calculation? (yes/no)"
+  valid_yes_no: "That's not a valid choice. Please enter 'yes' or 'no'"
   goodbye: "Thank you for using the calculator. Good-bye!"
 es:
   welcome: "Bienvenido a la calculadora! Entre su nombre:"

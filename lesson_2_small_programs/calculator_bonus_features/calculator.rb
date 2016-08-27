@@ -1,36 +1,33 @@
-#require_relative "config.rb"
 require 'yaml'
+
 MESSAGES = YAML.load_file('calculator_messages.yml')
 LANGUAGE = 'en'
 
-def messages(message, lang='en')
+def messages(message, lang = 'en')
   MESSAGES[lang][message]
 end
 
 def prompt(key)
   message = messages(key, LANGUAGE)
-  message ||= key # if no message found in the MESSAGES hash, just display the original key
+  message ||= key # if no message found in the hash, display the original key
   Kernel.puts("=> #{message}")
 end
 
 def valid_number?(num)
-  # /\A[\d\.]+\z/ =~ num
   /\A\d*\.?\d*\z/ =~ num && num =~ /\d/
-  # or /\d/.match(input) && /^\d*\.?\d*$/.match(input)
 end
 
 def operator_to_message(op)
-  word = case op
-         when "1"
-           "Adding"
-         when "2"
-           "Subtracting"
-         when "3"
-           "Multiplying"
-         when "4"
-           "Dividing"
-         end
-  word
+  case op
+  when "1"
+    "Adding"
+  when "2"
+    "Subtracting"
+  when "3"
+    "Multiplying"
+  when "4"
+    "Dividing"
+  end
 end
 
 prompt('welcome')
@@ -108,8 +105,14 @@ loop do # main loop
   prompt("The result is #{result}")
 
   prompt(messages('another_calculation'))
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?('y')
+  answer = nil
+  loop do
+    answer = Kernel.gets().chomp()
+    break if answer == "yes" || answer == "no"
+    prompt(messages('valid_yes_no'))
+  end
+  # break unless answer.downcase().start_with?('y')
+  break if answer == "no"
 end
 
 prompt(messages('goodbye'))
