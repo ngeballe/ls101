@@ -2,11 +2,11 @@
 
 # iterating without mutating object or its elemetns -- fine
 words = %w(scooby doo on channel two)
-words.each {|str| puts str}
+words.each { |str| puts str }
 
 # mutating elements within object but not object itself -- fine
 words = %w(scooby doo on channel two)
-words.each {|str| str << '!'}
+words.each { |str| str << '!' }
 puts words.inspect # => ["scooby!", "doo!", "on!", "channel!", "two!"]
 
 # BAD
@@ -20,4 +20,3 @@ words.each { |str| words.delete(str) }
 #   puts
 # end
 puts words.inspect
-

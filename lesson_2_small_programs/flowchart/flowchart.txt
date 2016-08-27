@@ -1,7 +1,0 @@
-start
-proc iterator = 0\nsaved_number = numbers[iterator]
-connector
-decision iterator = numbers.length ?
-yes -> stop
-no -> decision
-stop

@@ -1,6 +1,6 @@
 name = 'johnson'
 
-['kim', 'joe', 'sam'].each do |name|
+%w(kim joe sam).each do |name|
   # uh-oh, we cannot access the outer scoped "name"!
   puts "#{name} #{name}"
 end
@@ -9,7 +9,6 @@ end
 
 name = 'johnson'
 
-['kim', 'joe', 'sam'].each do |fname|
+%w(kim joe sam).each do |fname|
   name = fname
 end
-
