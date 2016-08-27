@@ -10,7 +10,7 @@ def parse_line(line)
     puts "  ~   ~  "
     puts "( Start )"
     puts "  ~   ~  "
-    puts 
+    puts
     #puts wrap_statement(line.capitalize, "~", "(")
   end
 end

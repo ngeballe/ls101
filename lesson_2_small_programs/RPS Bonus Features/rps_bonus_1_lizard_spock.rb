@@ -23,6 +23,14 @@ def display_results(player, computer)
   end
 end
 
+def validate_input(options)
+  loop do
+    input = gets.chomp
+    break input if options.include?(input)
+    prompt("Invalid entry. Please enter one of the folowing: #{options}.")
+  end
+end
+
 loop do
   choice = ''
   loop do
@@ -41,9 +49,9 @@ loop do
 
   display_results(choice, computer_choice)
 
-  prompt("Do you want to play again?")
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?("y")
+  prompt("Do you want to play again? (yes/no)")
+  answer = validate_input(%w(yes no))
+  break if answer == "no"
 end
 
 prompt("Thank you for playing. Goodbye!")

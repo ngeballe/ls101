@@ -5,4 +5,4 @@ def some_method(a)
 end
 
 # invoke the method
-some_method("john")   
+some_method("john")

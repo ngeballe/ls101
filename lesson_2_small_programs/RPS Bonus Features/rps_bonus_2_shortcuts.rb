@@ -5,6 +5,11 @@ CHOICE_SHORTCUTS_TO_WORDS = { "r" => "rock", "p" => "paper",
                               "sp" => "spock" }
 CHOICE_SHORTCUTS = CHOICE_SHORTCUTS_TO_WORDS.keys
 CHOICE_WORDS = CHOICE_SHORTCUTS_TO_WORDS.values
+PLAYER_1_WIN_CONDITIONS = [
+  %w(rock scissors), %w(rock lizard), %w(paper rock), %w(paper spock),
+  %w(scissors paper), %w(scissors lizard), %w(lizard spock), %w(lizard paper),
+  %w(spock rock), %w(spock scissors)
+]
 
 def say_choices
   s = "Choose one: "
@@ -20,16 +25,7 @@ def prompt(message)
 end
 
 def player1_wins?(player1, player2)
-  (player1 == "rock" && player2 == "scissors") ||
-    (player1 == "rock" && player2 == "lizard") ||
-    (player1 == "paper" && player2 == "rock") ||
-    (player1 == "paper" && player2 == "spock") ||
-    (player1 == "scissors" && player2 == "paper") ||
-    (player1 == "scissors" && player2 == "lizard") ||
-    (player1 == "lizard" && player2 == "spock") ||
-    (player1 == "lizard" && player2 == "paper") ||
-    (player1 == "spock" && player2 == "rock") ||
-    (player1 == "spock" && player2 == "scissors")
+  PLAYER_1_WIN_CONDITIONS.include?([player1, player2])
 end
 
 def display_results(player, computer)
@@ -39,6 +35,14 @@ def display_results(player, computer)
     prompt("Computer won.")
   else
     prompt("It's a tie.")
+  end
+end
+
+def validate_input(options)
+  loop do
+    input = gets.chomp
+    break input if options.include?(input)
+    prompt("Invalid entry. Please enter one of the folowing: #{options}.")
   end
 end
 
@@ -53,6 +57,7 @@ loop do
       prompt("That's not a valid choice.")
     end
   end
+
   choice = CHOICE_SHORTCUTS_TO_WORDS[choice] # convert to full word
 
   computer_choice = CHOICE_WORDS.sample
@@ -61,9 +66,9 @@ loop do
 
   display_results(choice, computer_choice)
 
-  prompt("Do you want to play again?")
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?("y")
+  prompt("Do you want to play again? (yes/no)")
+  answer = validate_input(%w(yes no))
+  break if answer == "no"
 end
 
 prompt("Thank you for playing. Goodbye!")

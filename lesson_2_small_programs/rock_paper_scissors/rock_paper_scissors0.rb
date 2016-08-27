@@ -43,7 +43,7 @@ loop do
   # computer chooses rock, paper, or scissors
 
   # report results
-  
+
   winner = find_winner(user_move, computer_move)
   winner_message = case winner
                    when :user
