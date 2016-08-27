@@ -24,6 +24,6 @@ def add_item_non_destructively(arr, item)
 end
 
 people = %w(ron jimmy michelle kat hoa)
-result  = add_item_non_destructively(people, "fred")
+result = add_item_non_destructively(people, "fred")
 p result # => ["ron", "jimmy", "michelle", "kat", "hoa", "fred"]
 p people # => ["ron", "jimmy", "michelle", "kat", "hoa"]

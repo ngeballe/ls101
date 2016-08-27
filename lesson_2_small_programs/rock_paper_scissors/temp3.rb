@@ -1,5 +1,5 @@
 def add_jr(name)
-  #name += ", Jr." # doesn't mutate caller--this creates a new name variable
+  # name += ", Jr." # doesn't mutate caller--this creates a new name variable
   puts "Adding Jr...."
   name << ", Jr." # does mutate caller
 end

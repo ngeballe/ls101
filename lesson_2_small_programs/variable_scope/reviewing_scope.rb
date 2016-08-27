@@ -10,7 +10,7 @@ end
 
 puts s == "kATE"
 
-puts city rescue puts "Exception because the variable city is local to the block"
+puts city rescue puts "Exception because variable city is local to block"
 
 age = 47
 

@@ -1,8 +1,8 @@
-scores = {bill: 0, kate: 0}
+scores = { bill: 0, kate: 0 }
 bill_wins = 0
 kate_wins = 0
 
-while true
+loop do
   random = rand(100)
   if random > 50
     puts "The winner is Bill"
